@@ -17,20 +17,19 @@ from datetime import timezone
 
 logger = logger(str(os.path.basename(__file__)))
 
-def get_users_stats(ripple_token, user_id, mode):
+
+def update_users_stats_work(user_id, mode):
     """
-    Access to ripple api and get user's recent scores.
+    Insert user's scores to work table.
     """
+    # Read config file.
+    config = util.get_config_object()
+    # Read ripple api token key.
+    ripple_token = config['token']['X-Ripple-Token']
     # Get user's recent stats from ripple api.
     users_stats_full = ripple_api.get_users_full(ripple_token, user_id)
     # Convert user's stats data to format of database.
     users_stats = util.convert_stats_data(user_id, users_stats_full, mode)
-    return users_stats
-
-def update_users_stats_work(users_stats, user_id, mode):
-    """
-    Insert user's scores to work table.
-    """
     # Define work table name.
     work_table_name = util.get_users_stats_work_table_name(mode)
     # Establish to database and get connection.
@@ -72,20 +71,18 @@ def update_users_stats_master(user_id, mode):
     # Close database connection
     db.close_database_connection(connection)
 
-def get_users_scores_recent(ripple_token, user_id, mode):
+def update_users_scores_work(user_id, mode):
     """
-    Access to ripple api and get user's recent scores.
+    Insert user's scores to work table.
     """
+    # Read config file.
+    config = util.get_config_object()
+    # Read ripple api token key.
+    ripple_token = config['token']['X-Ripple-Token']
     # Get user's recent scores from ripple api.
     users_scores_recent = ripple_api.get_users_scores_recent(ripple_token, user_id, mode,  100)
     # Convert user's scores data to format of database.
     users_scores = util.convert_scores_data(user_id, users_scores_recent)
-    return users_scores
-
-def update_users_scores_work(users_scores, user_id, mode):
-    """
-    Insert user's scores to work table.
-    """
     # Define work table name.
     work_table_name = util.get_users_scores_work_table_name(mode)
     # Establish to database and get connection.

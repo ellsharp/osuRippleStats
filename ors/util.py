@@ -10,6 +10,7 @@ from datetime import datetime
 from ors import util
 from ors.logger import logger
 from ors import ripple_api
+from ors import db
 
 logger = logger(str(os.path.basename(__file__)))
 
@@ -37,6 +38,39 @@ def convert_scores_data(user_id, scores_data):
     for read_data in scores_data:
         temp_data = {}
         temp_data['user_id'] = user_id
+        temp_data['score_id'] = read_data['id']
+        temp_data['beatmap_md5'] = read_data['beatmap_md5']
+        temp_data['max_combo'] = read_data['max_combo']
+        temp_data['score'] = read_data['score']
+        temp_data['is_full_combo'] = int(read_data['full_combo'])
+        temp_data['mods'] = read_data['mods']
+        temp_data['count_300'] = read_data['count_300']
+        temp_data['count_100'] = read_data['count_100']
+        temp_data['count_50'] = read_data['count_50']
+        temp_data['count_geki'] = read_data['count_geki']
+        temp_data['count_katu'] = read_data['count_katu']
+        temp_data['count_miss'] = read_data['count_miss']
+        temp_data['time'] = str(util.get_utc_datetime_from_iso(read_data['time']))
+        temp_data['play_mode'] = read_data['play_mode']
+        temp_data['accuracy'] = read_data['accuracy']
+        temp_data['pp'] = read_data['pp']
+        temp_data['rank'] = read_data['rank']
+        temp_data['completed'] = read_data['completed']
+        temp_data['created_on'] = str(datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S'))
+        temp_data['created_by'] = str(os.path.basename(__file__))
+        temp_data['updated_by'] = str(os.path.basename(__file__))
+        converted_scores_data.append(temp_data)
+    return converted_scores_data
+
+def convert_scores_data_full(scores_data):
+    """
+    Test method.
+    Convert users scores data to format of database.
+    """
+    converted_scores_data = []
+    for read_data in scores_data:
+        temp_data = {}
+        temp_data['user_id'] = read_data['user']['id']
         temp_data['score_id'] = read_data['id']
         temp_data['beatmap_md5'] = read_data['beatmap_md5']
         temp_data['max_combo'] = read_data['max_combo']
@@ -272,6 +306,22 @@ def get_mode_name(mode):
     else:
         logger.critical('Unexpected argument[%s] is given in method[%s]' % (mode, sys._getframe().f_code.co_name))
         sys.exit(1)
+
+def get_beatmap_id(beatmap_md5, mode):
+    connection = db.get_database_connection()
+    cursor = connection.cursor()
+    table_name = get_beatmaps_table_name(mode)
+    sql_file = open('sql/s_select_varchar.sql', 'r')
+    sql = sql_file.read()
+    statement = sql % ('beatmap_id', table_name, 'file_md5', beatmap_md5)
+    try:
+        cursor.execute(statement)
+        result = cursor.fetchall()
+    except Exception as e:
+        logger.error('Failed to get beatmap_id from beatmap_md5. Exception[%s]\n %s' % (e, traceback.format_exc()))
+        sys.exit(1)
+    beatmap_id = result[0]['beatmap_id']
+    return beatmap_id
 
 def get_utc_datetime_from_iso(iso_str):
     dt = None

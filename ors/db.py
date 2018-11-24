@@ -476,6 +476,8 @@ def execute_update_beatmap_master(connection, inserted_score_ids, master_table_n
     # Access to peppy api and get beatmap data.
     for beatmap_md5 in new_beatmap_md5s:
         beatmap_data = peppy_api.get_beatmaps(beatmap_md5, 0, 0, 1)
+        if beatmap_data == None:
+            continue;
         beatmap_data = dict(beatmap_data[0])
         beatmap_data = util.convert_beatmap_data(beatmap_data)
         # Insert new beatmap data to master table.

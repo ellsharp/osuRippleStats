@@ -13,10 +13,11 @@ if __name__ == "__main__":
     ripple_token = config['token']['X-Ripple-Token']
     #users_scores = core.get_users_scores_recent(ripple_token, user_id, mode)
     #print(users_scores)
-    #beatmap_md5 = '0b3fc409ebbcd28d14b2baa117161464'
+    beatmap_md5 = '0b3fc409ebbcd28d14b2baa117161464'
     #beatmap_data = peppy_api.get_beatmaps(beatmap_md5, mode, 0, 1)
     #print(beatmap_data)
-    core.update_all_first_place_master(mode)
+    beatmap_id = util.get_beatmap_id(beatmap_md5, mode)
+    print(beatmap_id)
     #core.update_beatmap_master(beatmap_data, mode)
 """
     connection = db.get_database_connection()
