@@ -97,6 +97,7 @@ def convert_activity(score, beatmap_id, song_name, ranking):
     activity = {}
     activity['user_id'] = score['user_id']
     activity['score_id'] = score['score_id']
+    activity['score'] = score['score']
     activity['beatmap_id'] = beatmap_id
     activity['beatmap_md5'] = score['beatmap_md5']
     activity['song_name'] = song_name.replace('\'', '\\\'')

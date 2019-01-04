@@ -11,7 +11,7 @@ if __name__ == "__main__":
 
 class RippleApi(object):
     global log
-    log = logger.logger('RippleApi')
+    log = logger.logger('ripple_api')
     config = ''
     ripple_token = ''
 

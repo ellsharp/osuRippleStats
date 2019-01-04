@@ -2,6 +2,7 @@ INSERT INTO
   t_users_activity(
     user_id,
     score_id,
+    score,
     beatmap_id,
     beatmap_md5,
     song_name,
@@ -13,6 +14,7 @@ INSERT INTO
     created_on
   )
 VALUES (
+  %s,
   %s,
   %s,
   %s,

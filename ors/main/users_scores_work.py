@@ -1,6 +1,7 @@
 import sys
 import os
 from ors.script.ripple_api import RippleApi
+from ors.script.database import Database
 from ors.script import converter
 from ors.script import database
 from ors.script import logger
@@ -11,12 +12,14 @@ if __name__ == "__main__":
 
 class UsersScoresWork(object):
     global log
-    log = logger.logger('UsersScoresWork')
-
-    def __init__(self):
-        self.logger = logger.logger('UsersScoresWork')
+    global database
+    global connection
+    log = logger.logger('users_scores_work')
+    database = Database()
+    connection = database.get_connection()
 
     def execute(self):
+        log.info('ORSI0001', 'UsersScoresWork')
         user_ids = self.__get_target_user_ids()
         for __user_id in user_ids:
             mode = 0 # In debugging always standard mode
@@ -25,9 +28,12 @@ class UsersScoresWork(object):
             users_scores = users_scores['scores']
             self.__set_users_scores_work(user_id, users_scores, mode)
             self.__set_beatmaps_work(users_scores, mode)
+        connection.commit()
+        connection.close()
+        log.info('ORSI0002', 'UsersScoresWork')
 
     def __get_target_user_ids(self):
-        result = database.execute_statement('m_users_S02')
+        result = database.execute_statement(connection, 'm_users_S02')
         user_ids = result[1]
         return user_ids
 
@@ -42,15 +48,23 @@ class UsersScoresWork(object):
             users_score = converter.convert_users_score(user_id, users_score)
             users_scores_temp.append(users_score)
         users_scores = users_scores_temp
-        result = database.execute_statement('w_users_scores_D01', user_id, mode)
+        result = database.execute_statement(connection, 'w_users_scores_D01', user_id, mode)
+        log.debug('ORSD0001', 'w_users_scores', result[0], user_id)
+        score_counter = 0
         for users_score in users_scores:
-            result = database.execute_statement_values('w_users_scores_I01', users_score.values())
+            result = database.execute_statement_values(connection, 'w_users_scores_I01', users_score.values())
+            score_counter = score_counter + result[0]
+        log.debug('ORSD0002', 'w_users_scores', score_counter, user_id)
 
     def __set_beatmaps_work(self, users_scores, mode):
         beatmaps = []
         for users_score in users_scores:
             beatmaps.append(users_score['beatmap'])
-        result = database.execute_statement('w_beatmaps_D01')
+        result = database.execute_statement(connection, 'w_beatmaps_D01')
+        log.debug('ORSD0005', 'w_users_scores', result[0])
+        beatmap_counter = 0
         for beatmap in beatmaps:
             beatmap = converter.convert_beatmap(beatmap, mode)
-            result = database.execute_statement_values('w_beatmaps_I01', beatmap.values())
+            result = database.execute_statement_values(connection, 'w_beatmaps_I01', beatmap.values())
+            beatmap_counter = beatmap_counter + result[0]
+        log.debug('ORSD0006', 'w_beatmaps', beatmap_counter)
