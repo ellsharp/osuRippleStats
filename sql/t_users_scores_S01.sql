@@ -1,0 +1,16 @@
+SELECT
+  *
+FROM
+  t_users_scores transaction
+WHERE NOT EXISTS(
+  SELECT
+    *
+  FROM
+    m_users_scores master
+  WHERE
+    master.score_id = transaction.score_id
+)
+ORDER BY
+  transaction.score_id
+ASC
+;

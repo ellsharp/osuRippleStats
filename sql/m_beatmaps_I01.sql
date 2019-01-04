@@ -1,0 +1,34 @@
+INSERT INTO
+  m_beatmaps(
+    beatmap_id,
+    beatmapset_id,
+    beatmap_md5,
+    song_name,
+    ar,
+    od,
+    difficulty,
+    max_combo,
+    hit_length,
+    ranked,
+    ranked_status_frozen,
+    latest_update,
+    mode,
+    created_on
+  )
+VALUES (
+  %s,
+  %s,
+  '%s',
+  '%s',
+  %s,
+  %s,
+  %s,
+  %s,
+  %s,
+  %s,
+  %s,
+  '%s',
+  %s,
+  '%s'
+)
+;

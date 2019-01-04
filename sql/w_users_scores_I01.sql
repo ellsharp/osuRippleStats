@@ -1,0 +1,46 @@
+INSERT INTO
+  ors.w_users_scores(
+    user_id,
+    score_id,
+    beatmap_md5,
+    max_combo,
+    score,
+    is_full_combo,
+    mods,
+    count_300,
+    count_100,
+    count_50,
+    count_geki,
+    count_katu,
+    count_miss,
+    time,
+    play_mode,
+    accuracy,
+    pp,
+    rank,
+    completed,
+    created_on
+  )
+VALUES(
+  %s,
+  %s,
+  '%s',
+  %s,
+  %s,
+  %s,
+  %s,
+  %s,
+  %s,
+  %s,
+  %s,
+  %s,
+  %s,
+  '%s',
+  %s,
+  %s,
+  %s,
+  '%s',
+  %s,
+  '%s'
+)
+;
