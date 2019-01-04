@@ -6,6 +6,7 @@ from ors.main.users_scores_transaction import UsersScoresTransaction
 from ors.main.users_scores_master import UsersScoresMaster
 from ors.main.beatmap_master import BeatmapMaster
 from ors.main.users_activity import UsersActivity
+from ors.main.first_place_master import FirstPlaceMaster
 from ors.script import logger
 import os
 import sys
@@ -26,6 +27,7 @@ class Admiral(object):
         self.__execute_shell(BeatmapMaster(), 'BeatmapMaster')
         self.__execute_shell(UsersScoresTransaction(), 'UsersScoresTransaction')
         self.__execute_shell(UsersScoresMaster(), 'UsersScoresMaster')
+        self.__execute_shell(FirstPlaceMaster(), 'FirstPlaceMaster')
         self.__execute_shell(UsersActivity(), 'UsersActivity')
 
     def __execute_shell(self, constructor, process_name):

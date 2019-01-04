@@ -104,6 +104,8 @@ def convert_activity(score, beatmap_id, song_name, ranking):
     activity['ranking'] = ranking
     if ranking == 1:
         activity['type'] = 1
+    elif ranking == -1:
+        activity['type'] = 2
     else:
         activity['type'] = 0
     activity['mode'] = score['play_mode']
