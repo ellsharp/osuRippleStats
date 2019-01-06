@@ -118,7 +118,6 @@
       $ranking = $row['ranking'];
       $rank = $row['rank'];
       $mode = $row['mode'];
-
       if ($type != 2) {
         if ($ranking < 51) {
           print('<tr>');
