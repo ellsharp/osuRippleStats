@@ -128,6 +128,13 @@
           print('</td>');
           print('<tr>');
         }
+      } else if ($type == 2) {
+        print('<tr>');
+        print('<td class="activity-time">'.get_datetime_diff($archived_on).'</td>');
+        print('<td class="activity-detail">');
+        print('ellsharp has lost first place on on <a href="https://ripple.moe/b/'.$beatmap_id.'">'.$song_name.'</a> ('.get_gamemode($mode).')');
+        print('</td>');
+        print('<tr>');
       }
       $counter++;
       if ($counter > 16) {

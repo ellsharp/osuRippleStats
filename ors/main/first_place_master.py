@@ -36,7 +36,7 @@ class FirstPlaceMaster(object):
     def __check_first_place(self, user_id):
         ripple_api = RippleApi()
         result = database.execute_statement(connection, 'm_first_place_S02', user_id)
-        log.info('ORSI0011', user_id, result[0])
+        log.info('ORSI0011', result[0], user_id)
         first_place_scores = result[1]
         not_changed_counter = 0
         lost_counter = 0
@@ -51,9 +51,11 @@ class FirstPlaceMaster(object):
                 result = database.execute_statement(connection, 'm_beatmaps_S02', beatmap_md5)
                 beatmap_id = result[1][0]['beatmap_id']
                 song_name = result[1][0]['song_name']
+                del first_place_score['archived_on']
+                first_place_score['archived_on'] = leaderboard_scores['score']['time']
                 activity = converter.convert_activity(first_place_score, beatmap_id, song_name, -1)
                 result = database.execute_statement_values(connection, 't_users_activity_I01', activity.values())
-                result = database.excute_staetmnet(connection, 'm_first_place_D01', first_place_score['score_id'])
+                result = database.execute_statement(connection, 'm_first_place_D01', first_place_score['score_id'])
                 log.debug('ORSD0017', user_id, first_place_score['score_id'], song_name, first_place_score['score'], first_place_score['rank'])
                 lost_counter = lost_counter + 1
             else:
