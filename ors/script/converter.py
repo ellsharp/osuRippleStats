@@ -114,6 +114,25 @@ def convert_activity(score, beatmap_id, song_name, ranking):
     activity['created_on'] = convert_datetime(datetime.now(pytz.timezone('UTC')))
     return activity
 
+def convert_beatmap_peppy(beatmap_info_peppy):
+    beatmap_info = {}
+    beatmap_info['beatmap_id'] = beatmap_info_peppy['beatmap_id']
+    beatmap_info['beatmapset_id'] = beatmap_info_peppy['beatmapset_id']
+    beatmap_info['beatmap_md5'] = beatmap_info_peppy['file_md5']
+    song_name = beatmap_info_peppy['artist'] + ' - ' + beatmap_info_peppy['title'] + ' [' + beatmap_info_peppy['version'] + ']'
+    beatmap_info['song_name'] = song_name.replace('\'', '\\\'')
+    beatmap_info['ar'] = beatmap_info_peppy['diff_approach']
+    beatmap_info['od'] = beatmap_info_peppy['diff_overall']
+    beatmap_info['difficulty'] = beatmap_info_peppy['difficultyrating']
+    beatmap_info['max_combo'] = beatmap_info_peppy['max_combo']
+    beatmap_info['hit_length'] = beatmap_info_peppy['hit_length']
+    beatmap_info['ranked'] = -1
+    beatmap_info['ranked_status_frozen'] = -1
+    beatmap_info['latest_update'] = beatmap_info_peppy['last_update']
+    beatmap_info['mode'] = beatmap_info_peppy['mode']
+    beatmap_info['created_on'] = convert_datetime(datetime.now(pytz.timezone('UTC')))
+    return beatmap_info
+
 def convert_iso_datetime(iso_str):
     dt = None
     if ":" == iso_str[-3:-2]:

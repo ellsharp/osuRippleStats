@@ -4,6 +4,7 @@ from ors.script.database import Database
 from ors.script.ripple_api import RippleApi
 from ors.script import converter
 from ors.script import logger
+from ors.script import util
 
 if __name__ == "__main__":
     from ors.main.users_scores_master import UsersScoresMaster
@@ -47,15 +48,13 @@ class UsersScoresMaster(object):
             master_score = result[1]
             if bool(master_score) == False:
                 # Case of new score.
-                del new_score['is_on_master']
-                del new_score['is_on_activity']
                 del new_score['updated_on']
                 result = database.execute_statement_values(connection, 'm_users_scores_I01', new_score.values())
-                result = database.execute_statement(connection, 'm_beatmaps_S01', new_score['beatmap_md5'])
-                song_name = result[1][0]['song_name']
+                beatmap_info = util.get_beatmap_info(new_score['beatmap_md5'], new_score['play_mode'])
+                song_name = beatmap_info['song_name']
                 log.debug('ORSD0011', new_score['user_id'], new_score['score_id'], song_name, new_score['score'], new_score['rank'])
                 # Mark the score has processed on transaction.
-                result = database.execute_statement(connection, 't_users_scores_U01', new_score['score_id'])
+                result = database.execute_statement(connection, 'l_scores_on_master_I01', user_id, new_score['score_id'], 1, new_score['created_on'])
                 new_counter = new_counter + 1
             else:
                 # Case of updated or not score.
@@ -64,62 +63,23 @@ class UsersScoresMaster(object):
                 new_scores_score = new_score['score']
                 if new_scores_score > master_scores_score:
                     # Case of updated score.
-                    del new_score['is_on_master']
-                    del new_score['is_on_activity']
+                    created_on = new_score['created_on']
                     del new_score['created_on']
                     del new_score['updated_on']
                     new_score.update(beatmap_md5_key=new_score['beatmap_md5'])
                     result = database.execute_statement_values(connection, 'm_users_scores_U01', new_score.values())
-                    result = database.execute_statement(connection, 'm_beatmaps_S01', new_score['beatmap_md5'])
-                    song_name = result[1][0]['song_name']
+                    beatmap_info = util.get_beatmap_info(new_score['beatmap_md5'], new_score['play_mode'])
+                    song_name = beatmap_info['song_name']
                     log.debug('ORSD0012', new_score['user_id'], new_score['score_id'], song_name, new_score['score'], new_score['rank'])
                     # Mark the score has processed on transaction.
-                    result = database.execute_statement(connection, 't_users_scores_U01', new_score['score_id'])
+                    result = database.execute_statement(connection, 'l_scores_on_master_I01', user_id, new_score['score_id'], 2, created_on)
                     updated_counter = updated_counter + 1
                 else:
                     # Case of not updated score.
-                    result = database.execute_statement(connection, 'm_beatmaps_S01', new_score['beatmap_md5'])
-                    song_name = result[1][0]['song_name']
+                    beatmap_info = util.get_beatmap_info(new_score['beatmap_md5'], new_score['play_mode'])
+                    song_name = beatmap_info['song_name']
                     log.debug('ORSD0013', new_score['user_id'], new_score['score_id'], song_name, new_score['score'], new_score['rank'])
                     # Mark the score has processed on transaction.
-                    result = database.execute_statement(connection, 't_users_scores_U01', new_score['score_id'])
+                    result = database.execute_statement(connection, 'l_scores_on_master_I01', user_id, new_score['score_id'], 3, new_score['created_on'])
                     not_updated_counter = not_updated_counter + 1;
         log.info('ORSI0010', new_counter, updated_counter, not_updated_counter)
-
-"""
-    def __get_scores_ranking(self, score_dict):
-        ripple_api = RippleApi()
-        leaderboard_scores = ripple_api.get_leaderboard(score_dict['beatmap_md5'], score_dict['play_mode'])
-        leaderboard_scores = leaderboard_scores['scores']
-        score_id = score_dict['score_id']
-        score = score_dict['score']
-        counter = 1
-        for leaderboard_score in leaderboard_scores:
-            leaderboard_scores_score = leaderboard_score['score']
-            leaderboard_score_id = leaderboard_score['id']
-            leaderboard_user_id = leaderboard_score['user']['id']
-            score_user_id = score_dict['user_id']
-            if score_id == leaderboard_score_id:
-                break;
-            else:
-                if score > leaderboard_scores_score:
-                    break;
-                else:
-                    if leaderboard_user_id == score_user_id:
-                        break;
-                    else:
-                        counter = counter + 1
-        return counter
-
-    def __set_users_activity(self, score, ranking):
-        beatmap_md5 = score['beatmap_md5']
-        result = database.execute_statement('m_beatmaps_S02', beatmap_md5)
-        beatmap_id = result[1][0]['beatmap_id']
-        song_name = result[1][0]['song_name']
-        activity = converter.convert_activity(score, beatmap_id, song_name, ranking)
-        # Duplicate check
-        result = database.execute_statement('t_users_activity_S01', activity['score_id'])
-        count = result[0]
-        if count == 0:
-            result = database.execute_statement_values('t_users_activity_I01', activity.values())
-"""

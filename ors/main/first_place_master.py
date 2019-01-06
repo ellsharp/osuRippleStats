@@ -36,7 +36,10 @@ class FirstPlaceMaster(object):
     def __check_first_place(self, user_id):
         ripple_api = RippleApi()
         result = database.execute_statement(connection, 'm_first_place_S02', user_id)
+        log.info('ORSI0011', user_id, result[0])
         first_place_scores = result[1]
+        not_changed_counter = 0
+        lost_counter = 0
         for first_place_score in first_place_scores:
             beatmap_md5 = first_place_score['beatmap_md5']
             mode = first_place_score['play_mode']
@@ -50,7 +53,15 @@ class FirstPlaceMaster(object):
                 song_name = result[1][0]['song_name']
                 activity = converter.convert_activity(first_place_score, beatmap_id, song_name, -1)
                 result = database.execute_statement_values(connection, 't_users_activity_I01', activity.values())
-
+                result = database.excute_staetmnet(connection, 'm_first_place_D01', first_place_score['score_id'])
+                log.debug('ORSD0017', user_id, first_place_score['score_id'], song_name, first_place_score['score'], first_place_score['rank'])
+                lost_counter = lost_counter + 1
+            else:
+                result = database.execute_statement(connection, 'm_beatmaps_S02', beatmap_md5)
+                song_name = result[1][0]['song_name']
+                log.debug('ORSD0018', user_id, first_place_score['score_id'], song_name, first_place_score['score'], first_place_score['rank'])
+                not_changed_counter = not_changed_counter + 1
+        log.info('ORSI0013', user_id, not_changed_counter, lost_counter)
 
     def __set_first_place(self, user_id):
         result = database.execute_statement(connection, 't_users_activity_S04', user_id)
@@ -64,10 +75,9 @@ class FirstPlaceMaster(object):
             if count == 0:
                 result = database.execute_statement(connection, 't_users_scores_S02', activity_score_id)
                 score = result[1][0]
-                del score['is_on_master']
-                del score['is_on_activity']
                 del score['updated_on']
                 result = database.execute_statement_values(connection, 'm_first_place_I01', score.values())
+                result = database.execute_statement(connection, 'l_scores_on_first_place_I01', user_id, score['score_id'], 1, score['created_on'])
                 result = database.execute_statement(connection, 'm_beatmaps_S01', score['beatmap_md5'])
                 song_name = result[1][0]['song_name']
                 log.debug('ORSD0015', user_id, activity_score_id, song_name, score['score'], score['rank'])
@@ -75,12 +85,14 @@ class FirstPlaceMaster(object):
                 if activity_score_id != result[1][0]['score_id']:
                     result = database.execute_statement(connection, 't_users_scores_S02', activity_score_id)
                     score = result[1][0]
-                    del score['is_on_master']
-                    del score['is_on_activity']
+                    created_on = score['created_on']
                     del score['created_on']
                     del score['updated_on']
                     score.update(beatmap_md5_key=score['beatmap_md5'])
                     result = database.execute_statement_values(connection, 'm_first_place_U01', score.values())
+                    result = database.execute_statement(connection, 'l_scores_on_first_place_I01', user_id, score['score_id'], 2, created_on)
                     result = database.execute_statement(connection, 'm_beatmaps_S01', score['beatmap_md5'])
                     song_name = result[1][0]['song_name']
                     log.debug('ORSD0016', user_id, activity_score_id, song_name, score['score'], score['rank'])
+                else:
+                    result = database.execute_statement(connection, 'l_scores_on_first_place_I01', user_id, score['score_id'], 3, created_on)

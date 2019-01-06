@@ -8,7 +8,13 @@
     $pp_std = $row['pp_std'];
     $global_leaderboard_rank_std = $row['global_leaderboard_rank_std'];
     $country_leaderboard_rank_std = $row['country_leaderboard_rank_std'];
-    $ranked_score_std = $row['ranked_score_std'];
+    $ranked_score = $row['ranked_score_std'];
+    $accuracy = $row['accuracy_std'];
+    $playcount = $row['playcount_std'];
+    $total_score = $row['total_score_std'];
+    $level = $row['level_std'];
+    $total_hits = $row['total_hits_std'];
+
   }
   function get_pdo(){
     $database_config = parse_ini_file('../conf/database.conf');
@@ -33,6 +39,46 @@
       return 'Catch the Beat';
     } else if ($mode == 3) {
       return 'osu!mania';
+    }
+  }
+  function get_users_pp_rank_history($mode) {
+    $query = 'select date_format(created_on, \'%Y-%m-%d\') as date, MAX(global_leaderboard_rank_std) as pp_rank from t_users_stats group by date_format(created_on, \'%Y-%m-%d\') ORDER BY pp_rank DESC;';
+    $pdo = get_pdo();
+    $statement = $pdo -> prepare($query);
+    $statement -> execute();
+
+    $date = [];
+    $pp_rank = [];
+    $counter = 0;
+    while ($row = $statement -> fetch(PDO::FETCH_ASSOC)) {
+      $date[] = $row['date'];
+      $pp_rank[] = $row['pp_rank'];
+      $counter = $counter + 1;
+      if ($counter > 90) {
+        break;
+      }
+    }
+    $return = [];
+    $return[] = $date;
+    $return[] = $pp_rank;
+    return $return;
+  }
+  $result = get_users_pp_rank_history(0);
+  $date = $result[0];
+  $pp_rank =$result[1];
+  function print_label($date) {
+    for ($i = 0; $i < count($date); $i++) {
+      if ($i == 29) {
+        print('"ALOHA", ');
+      } else {
+        print('"", ');
+        //print($date[$i].',');
+      }
+    }
+  }
+  function print_data($pp_rank) {
+    for ($i = 0; $i < count($pp_rank); $i++) {
+      print($pp_rank[$i].',');
     }
   }
   function print_activity() {
@@ -62,7 +108,7 @@
       }
       print('<tr>');
       $counter++;
-      if ($counter > 30) {
+      if ($counter > 10) {
         break;
       }
     }
@@ -165,20 +211,33 @@
       var ChartDemo = new Chart(ctx, {
          type: 'line',
          data: {
-            labels: ["Item1", "Item2", "Item3", "Item4", "Item5", "Item6", "Item7"],
+            labels: [<?php print_label($date); ?>],
             datasets: [
             {
-               label: "Chart-1",
+               label: "Performance Ranking",
                borderColor: 'rgb(255, 0, 0)',
                lineTension: 0, //<===追加
                fill: false,    //<===追加
-               data: [20, 26, 12, 43, 33, 21, 29],
+               data: [<?php print_data($pp_rank); ?>],
             },
             ]
          },
          options: {
             responsive: false,
-         }
+            scales: {
+              yAxes: [{
+                display: true,
+                ticks: {
+                  reverse: true
+                }
+              }]
+            },
+            elements: {
+              point: {
+                radius: 0
+              }
+            }
+          }
         });
       </script>
     </div>
@@ -199,6 +258,11 @@
       </table>
     </div>
     <div class="section">Detail Stats</div>
-    <div class="stats">Ranked Score: <?php print(number_format($ranked_score_std)) ?></div>
+    <div class="stats"><b>Ranked Score:</b> <?php print(number_format($ranked_score)) ?></div>
+    <div class="stats"><b>Hit Accuracy:</b> <?php print(number_format($accuracy, 2).'%') ?></div>
+    <div class="stats"><b>Play Count:</b> <?php print(number_format($playcount)) ?></div>
+    <div class="stats"><b>Total Score:</b> <?php print(number_format($total_score)) ?></div>
+    <div class="stats"><b>Current Level:</b> <?php print(number_format($level)) ?></div>
+    <div class="stats"><b>Total Hits:</b> <?php print(number_format($total_hits)) ?></div>
   </div>
 </body>

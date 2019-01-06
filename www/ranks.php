@@ -11,7 +11,7 @@
   $dsn = 'mysql:dbname='.$db_dbname.'; host='.$db_host.'; port='.$db_port.'; charset='.$db_charset;
   $pdo = new PDO($dsn, $db_user, $db_password);
 
-  $query = 'SELECT rank, COUNT(rank) AS count FROM m_users_scores_std GROUP BY rank';
+  $query = 'SELECT rank, COUNT(rank) AS count FROM m_users_scores GROUP BY rank';
 
   $statement = $pdo -> prepare($query);
   $statement -> execute();
@@ -33,7 +33,7 @@
 <table align="center" width="400" cellspacing="0" cellpadding="0">
   <tbody>
     <tr>
-      <td width="42"><img height="42" src="/images/X.png"></td><td width="50"><?php print($count_ss) ?></td>
+      <td width="42"><img height="42" src="/images/SS.png"></td><td width="50"><?php print($count_ss) ?></td>
       <td width="42"><img height="42" src="/images/S.png"></td><td width="50"><?php print($count_s) ?></td>
       <td width="42"><img height="42" src="/images/A.png"></td><td width="50"><?php print($count_a) ?></td>
     </tr>

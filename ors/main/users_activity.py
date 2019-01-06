@@ -69,9 +69,9 @@ class UsersActivity(object):
                 result = database.execute_statement_values(connection, 't_users_activity_I01', activity.values())
                 log.debug('ORSD0014', transact_score['user_id'], transact_score['score_id'], song_name, transact_score['score'], transact_score['rank'], ranking)
                 # Mark the score has processed on transaction.
-                result = database.execute_statement(connection, 't_users_scores_U02', 1, transact_score_score_id)
+                result = database.execute_statement(connection, 'l_scores_on_activity_I01', user_id, transact_score_score_id, 1, transact_score['created_on'])
             else:
                 # Mark the score has processed on transaction.
-                result = database.execute_statement(connection, 't_users_scores_U02', 2, transact_score_score_id)
+                result = database.execute_statement(connection, 'l_scores_on_activity_I01', user_id, transact_score_score_id, 3, transact_score['created_on'])
             counter = counter + 1
-        log.info('ORSI0011', user_id, counter)
+        log.info('ORSI0011',  counter, user_id)

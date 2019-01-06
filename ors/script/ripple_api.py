@@ -51,6 +51,12 @@ class RippleApi(object):
         response = self.get_api_response(api_url, api_parameters)
         return response
 
+    def get_beatmap_info(self, beatmap_md5, mode):
+        api_url = self.config['url']['get_beatmaps']
+        api_parameters = {'limit': 1, 'h': beatmap_md5, 'm': mode}
+        response = self.get_api_response_peppy(api_url, api_parameters)
+        return response
+
     def get_api_response(self, api_url, api_parameters):
         retry_count = 2
         for i in range(3):
@@ -64,6 +70,26 @@ class RippleApi(object):
                     break;
                 else:
                     log.error('ORSE0002', response_code, retry_count, api_url, api_parameters)
+            except Exception as e:
+                    log.error('ORSE0001', retry_count, e, api_url, api_parameters)
+            if retry_count > 0:
+                retry_count = retry_count - 1
+                time.sleep(60)
+            else:
+                log.critical('ORSC0002', api_url, api_parameters)
+                sys.exit(1)
+        time.sleep(0.5)
+        return response
+
+    def get_api_response_peppy(self, api_url, api_parameters):
+        retry_count = 2
+        for i in range(3):
+            try:
+                api_response = requests.get(api_url, params=api_parameters)
+                response = api_response.json()
+                # Check Ripple API's return code.
+                log.debug('ORSD0003', api_url, api_parameters)
+                break
             except Exception as e:
                     log.error('ORSE0001', retry_count, e, api_url, api_parameters)
             if retry_count > 0:
