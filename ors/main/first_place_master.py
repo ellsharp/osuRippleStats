@@ -51,8 +51,9 @@ class FirstPlaceMaster(object):
                 result = database.execute_statement(connection, 'm_beatmaps_S02', beatmap_md5)
                 beatmap_id = result[1][0]['beatmap_id']
                 song_name = result[1][0]['song_name']
-                del first_place_score['archived_on']
-                first_place_score['archived_on'] = leaderboard_scores['score']['time']
+                del first_place_score['time']
+                first_place_score['time'] = leaderboard_scores['scores'][0]['time']
+                first_place_score = converter.convert_first_place_score(first_place_score)
                 activity = converter.convert_activity(first_place_score, beatmap_id, song_name, -1)
                 result = database.execute_statement_values(connection, 't_users_activity_I01', activity.values())
                 result = database.execute_statement(connection, 'm_first_place_D01', first_place_score['score_id'])

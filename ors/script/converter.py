@@ -133,6 +133,10 @@ def convert_beatmap_peppy(beatmap_info_peppy):
     beatmap_info['created_on'] = convert_datetime(datetime.now(pytz.timezone('UTC')))
     return beatmap_info
 
+def convert_first_place_score(first_place_score):
+    first_place_score['time'] = convert_datetime(convert_iso_datetime(first_place_score['time']))
+    return first_place_score
+
 def convert_iso_datetime(iso_str):
     dt = None
     if ":" == iso_str[-3:-2]:
