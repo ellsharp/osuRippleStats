@@ -6,6 +6,8 @@ body {
 div.profile-left {
   width: 220px;
   float: left;
+  position: fixed;
+  top: 0; 
   background-color: #FF0000
 }
 div.profile-right {
