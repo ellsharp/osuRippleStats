@@ -36,4 +36,5 @@ class Admiral(object):
             constructor.execute()
         except Exception as e:
             log.critical('ORSC0001', process_name, e)
+            sys.exit(1)
         log.info('ORSI0002', process_name)

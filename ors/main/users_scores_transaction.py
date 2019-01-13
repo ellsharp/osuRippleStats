@@ -17,11 +17,15 @@ class UsersScoresTransaction(object):
     connection = database.get_connection()
 
     def execute(self):
-        log.info('ORSI0001', 'UsersScoresTransaction')
-        self.__set_users_scores_transaction()
-        connection.commit()
-        connection.close()
-        log.info('ORSI0002', 'UsersScoresTransaction')
+        try:
+            log.info('ORSI0001', 'UsersScoresTransaction')
+            self.__set_users_scores_transaction()
+            connection.commit()
+            connection.close()
+            log.info('ORSI0002', 'UsersScoresTransaction')
+        except Exception as e:
+            log.critical('ORSC0001', 'UsersScoresTransaction', e)
+            raise Exception(e)
 
     def __set_users_scores_transaction(self):
         result = database.execute_statement(connection, 't_users_scores_I01')

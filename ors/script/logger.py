@@ -67,4 +67,4 @@ class logger:
         message_list = logger.__get_message_list()
         message = message_list['critical'][message_code]
         message = message % values
-        self.logger.critical(message)
+        self.logger.critical(message, stack_info=True, exc_info=True)

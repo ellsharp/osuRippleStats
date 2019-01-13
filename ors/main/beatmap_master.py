@@ -17,11 +17,15 @@ class BeatmapMaster(object):
     connection = database.get_connection()
 
     def execute(self):
-        log.info('ORSI0001', 'BeatmapMaster')
-        self.__set_beatmap_master()
-        connection.commit()
-        connection.close()
-        log.info('ORSI0002', 'BeatmapMaster')
+        try:
+            log.info('ORSI0001', 'BeatmapMaster')
+            self.__set_beatmap_master()
+            connection.commit()
+            connection.close()
+            log.info('ORSI0002', 'BeatmapMaster')
+        except Exception as e:
+            log.critical('ORSC0001', 'BeatmapMaster', e)
+            raise Exception(e)
 
     def __set_beatmap_master(self):
         # Insert new beatmaps from work to master.

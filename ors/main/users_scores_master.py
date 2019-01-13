@@ -1,3 +1,4 @@
+import traceback
 import sys
 import os
 from ors.script.database import Database
@@ -19,15 +20,19 @@ class UsersScoresMaster(object):
     connection = database.get_connection()
 
     def execute(self):
-        log.info('ORSI0001', 'UsersScoresMaster')
-        user_ids = self.__get_target_user_ids()
-        for __user_id in user_ids:
-            user_id = __user_id['user_id']
-            new_scores = self.__get_users_scores_transaction(user_id)
-            self.__set_users_scores_master(new_scores, user_id)
-        connection.commit()
-        connection.close()
-        log.info('ORSI0002', 'UsersScoresMaster')
+        try:
+            log.info('ORSI0001', 'UsersScoresMaster')
+            user_ids = self.__get_target_user_ids()
+            for __user_id in user_ids:
+                user_id = __user_id['user_id']
+                new_scores = self.__get_users_scores_transaction(user_id)
+                self.__set_users_scores_master(new_scores, user_id)
+            connection.commit()
+            connection.close()
+            log.info('ORSI0002', 'UsersScoresMaster')
+        except Exception as e:
+            log.critical('ORSC0001', 'UsersScoreMaster', e)
+            raise Exception(e)
 
     def __get_target_user_ids(self):
         result = database.execute_statement(connection, 'm_users_003')

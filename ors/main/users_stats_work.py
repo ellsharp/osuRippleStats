@@ -18,17 +18,21 @@ class UsersStatsWork(object):
     connection = database.get_connection()
 
     def execute(self):
-        log.info('ORSI0001', 'UsersStatsWork')
-        user_ids = self.__get_target_user_ids()
-        for __user_id in user_ids:
-            user_id = __user_id['user_id']
-            users_stats = self.__get_users_stats(user_id)
-            self.__set_users_stats_work(users_stats)
-            self.__set_users_badge_work(user_id, users_stats)
-            self.__set_users_silence_info_work(user_id, users_stats)
-        connection.commit()
-        connection.close()
-        log.info('ORSI0002', 'UsersStatsWork')
+        try:
+            log.info('ORSI0001', 'UsersStatsWork')
+            user_ids = self.__get_target_user_ids()
+            for __user_id in user_ids:
+                user_id = __user_id['user_id']
+                users_stats = self.__get_users_stats(user_id)
+                self.__set_users_stats_work(users_stats)
+                self.__set_users_badge_work(user_id, users_stats)
+                self.__set_users_silence_info_work(user_id, users_stats)
+            connection.commit()
+            connection.close()
+            log.info('ORSI0002', 'UsersStatsWork')
+        except Exception as e:
+            log.critical('ORSC0001', 'UsersStatsWork', e)
+            raise Exception(e)
 
     def __get_target_user_ids(self):
         result = database.execute_statement(connection, 'm_users_003')

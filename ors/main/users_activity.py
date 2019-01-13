@@ -18,14 +18,18 @@ class UsersActivity(object):
     connection = database.get_connection()
 
     def execute(self):
-        log.info('ORSI0001', 'UsersActivity')
-        user_ids = self.__get_target_user_ids()
-        for __user_id in user_ids:
-            user_id = __user_id['user_id']
-            self.__set_users_activity(user_id)
-        connection.commit()
-        connection.close()
-        log.info('ORSI0002', 'UsersActivity')
+        try:
+            log.info('ORSI0001', 'UsersActivity')
+            user_ids = self.__get_target_user_ids()
+            for __user_id in user_ids:
+                user_id = __user_id['user_id']
+                self.__set_users_activity(user_id)
+            connection.commit()
+            connection.close()
+            log.info('ORSI0002', 'UsersActivity')
+        except Exception as e:
+            log.critical('ORSC0001', 'UsersActivity', e)
+            raise Exception(e)
 
     def __get_target_user_ids(self):
         result = database.execute_statement(connection, 'm_users_003')

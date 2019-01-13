@@ -19,18 +19,22 @@ class UsersScoresWork(object):
     connection = database.get_connection()
 
     def execute(self):
-        log.info('ORSI0001', 'UsersScoresWork')
-        user_ids = self.__get_target_user_ids()
-        for __user_id in user_ids:
-            mode = 0 # In debugging always standard mode
-            user_id = __user_id['user_id']
-            users_scores = self.__get_users_scores(user_id, mode)
-            users_scores = users_scores['scores']
-            self.__set_users_scores_work(user_id, users_scores, mode)
-            self.__set_beatmaps_work(users_scores, mode)
-        connection.commit()
-        connection.close()
-        log.info('ORSI0002', 'UsersScoresWork')
+        try:
+            log.info('ORSI0001', 'UsersScoresWork')
+            user_ids = self.__get_target_user_ids()
+            for __user_id in user_ids:
+                mode = 0 # In debugging always standard mode
+                user_id = __user_id['user_id']
+                users_scores = self.__get_users_scores(user_id, mode)
+                users_scores = users_scores['scores']
+                self.__set_users_scores_work(user_id, users_scores, mode)
+                self.__set_beatmaps_work(users_scores, mode)
+            connection.commit()
+            connection.close()
+            log.info('ORSI0002', 'UsersScoresWork')
+        except Exception as e:
+            log.critical('ORSC0001', 'UsersScoresWork', e)
+            raise Exception(e)
 
     def __get_target_user_ids(self):
         result = database.execute_statement(connection, 'm_users_S02')
