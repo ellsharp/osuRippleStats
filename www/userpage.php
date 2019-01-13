@@ -35,9 +35,9 @@
   <script src="semantic/dist/semantic.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
   <script>
-  $(function(){
-    $('#current-level').progress();
-  });
+    window.onLoad=$('#current-level').progress({
+  percent: 22
+});
   </script>
 </head>
 <body>
@@ -149,9 +149,9 @@
         </div>
         <div class="ui attached segment">
           <p>Current Level: <?php print(number_format($level)) ?></p>
-          <div class="ui progress">
+          <div class="ui indicating progress">
             <div class="bar">
-              <div class="progress" data-percent="74" id="current-level"></div>
+              <div class="progress" data-percent="74" id="current-level">74%</div>
             </div>
           </div>
         </div>
