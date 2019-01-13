@@ -130,10 +130,13 @@
   function get_datetime_diff($datetime) {
     $now = new Datetime();
     $datetime = new Datetime($datetime);
+    $month = date_diff($datetime, $now) -> format('%m');
     $day = date_diff($datetime, $now) -> format('%d');
     $hour = date_diff($datetime, $now) -> format('%h');
     $minute = date_diff($datetime, $now) -> format('%i');
-    if ($day > 1) {
+    if ($month > 1) {
+      return $month.' months ago';
+    } else if ($day > 1) {
       return $day.' days ago';
     } else if ($day > 0) {
       return 'about '.(24 + $hour).' hours ago';
@@ -145,9 +148,10 @@
       return 'less than minute ago';
     }
   }
-  function print_users_activity($user_id) {
+  function print_users_activity($user_id, $username) {
     $users_activity = get_users_activity($user_id, 30);
     $counter = 0;
+    print('<div class="ui two column grid attached segment">');
     foreach ($users_activity as $activity) {
       $type = $activity['type'];
       $ranking = $activity['ranking'];
@@ -157,32 +161,40 @@
       $song_name = $activity['song_name'];
       $mode_name = get_mode_name_full($activity['mode']);
       if ($type != 2 and $ranking < 51) {
-        print('<tr>');
-        print('<td class="activity-time">'.get_datetime_diff($archived_on).'</td>');
-        print('<td class="activity-detail">');
-        print('<img src="/images/'.$rank.'_small.png" />');
-        print('ellsharp archived rank ');
+        print('<div class="three wide column attached segment">');
+        print('<p>'.get_datetime_diff($archived_on).'</p>');
+        print('</div>');
+        print('<div class="thirteen wide column attached segment">');
+        print('<p>');
+        print('<img src="/images/'.$rank.'_small.png" style="padding-right: 8px"/>');
+        print($username.' archived rank ');
         if ($ranking < 4) {
           print('<b>#'.$ranking.'</b> on <a href="https://ripple.moe/b/'.$beatmap_id.'">'.$song_name.'</a> ('.$mode_name.')');
         } else {
           print('#'.$ranking.' on <a href="https://ripple.moe/b/'.$beatmap_id.'">'.$song_name.'</a> ('.$mode_name.')');
         }
+        print('</p>');
+        print('</div>');
       } else if ($type == 2) {
-        print('<tr>');
-        print('<td class="activity-time">'.get_datetime_diff($archived_on).'</td>');
-        print('<td class="activity-detail">');
-        print('ellsharp has lost first place on on <a href="https://ripple.moe/b/'.$beatmap_id.'">'.$song_name.'</a> ('.$mode_name.')');
+        print('<div class="three wide column attached segment">');
+        print('<p>'.get_datetime_diff($archived_on).'</p>');
+        print('</div>');
+        print('<div class="thirteen wide column attached segment">');
+        print('<p>');
+        print($username.' has lost first place on on <a href="https://ripple.moe/b/'.$beatmap_id.'">'.$song_name.'</a> ('.$mode_name.')');
+        print('</p>');
+        print('</div>');
       }
-      print('</td>');
-      print('</tr>');
       $counter += 1;
     }
+    print('</div>');
   }
   function print_first_place_ranks($user_id, $mode_num) {
     $pdo = get_pdo();
     $query = 'SELECT m_first_place.score_id AS score_id, m_first_place.mods AS mods, m_first_place.rank AS rank, m_first_place.time AS time, m_first_place.accuracy AS accuracy, m_first_place.pp AS pp, m_beatmaps.song_name, m_beatmaps.beatmap_id as beatmap_id FROM m_first_place INNER JOIN  m_beatmaps ON m_first_place.beatmap_md5 = m_beatmaps.beatmap_md5 WHERE m_first_place.user_id = :user_id AND m_first_place.play_mode = :mode_num ORDER BY time DESC;';
     $statement = $pdo -> prepare($query);
     $statement -> execute([':user_id' => $user_id, 'mode_num' => $mode_num]);
+    print('<div class="ui attached segments">');
     while ($row = $statement -> fetch(PDO::FETCH_ASSOC)) {
       $rank = $row['rank'];
       $song_name = $row['song_name'];
@@ -192,14 +204,30 @@
       $pp = $row['pp'];
       $score_id = $row['score_id'];
       $beatmap_id = $row['beatmap_id'];
-      print('<tr>');
-      print('<td><img src="/images/'.$rank.'.png" width="12" height="15" style="padding-right: 8px"><a href="https://ripple.moe/b/'.$beatmap_id.'">'.$song_name.' ('.sprintf('%0.2f', $accuracy).'%)</a></td>');
-      print('<td style="text-align: right">'.sprintf('%d', $pp).'pp</td>');
-      print('</tr>');
-      print('<tr>');
-      print('<td>'.$time.'</td>');
-      print('<td style="text-align: right"><a href="https://ripple.moe/web/replays/'.$score_id.'">★</a></td>');
-      print('</tr>');
+      print('<div class="ui horizontal two column grid attached segment" style="margin: 0">');
+      print('<div class="thirteen wide column left aligned">');
+      print('<p>');
+      print('<img src="/images/'.$rank.'_small.png" style="padding-right: 8px">');
+      print('<a href="https://ripple.moe/b/'.$beatmap_id.'">'.$song_name.' ('.sprintf('%0.2f', $accuracy).'%)</a>');
+      print('</p>');
+      print('<p>'.get_datetime_diff($time).'</p>');
+      print('</div>');
+      print('<div class="three wide column right aligned">');
+      print('<p>'.sprintf('%d', $pp).'pp</p>');
+      print('<p><a href="https://ripple.moe/web/replays/'.$score_id.'"><i class="star link icon"></i></a></p>');
+      print('</div>');
+      print('</div>');
+    }
+    print('</div>');
+  }
+  function print_pp_chart_label($date) {
+    for ($i = count($date); 0 < $i; $i--) {
+      print('"'.$i.'", ');
+    }
+  }
+  function print_pp_chart_data($pp_rank) {
+    for ($i = 0; $i < count($pp_rank); $i++) {
+      print($pp_rank[$i].',');
     }
   }
 ?>

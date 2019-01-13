@@ -1,58 +1,11 @@
-body {
-  margin-right: auto;
-  margin-left: auto;
-  width: 860px;
+h2 {
+  margin: 2em 0em;
 }
-div.profile-left {
-  width: 220px;
-  float: left;
-  position: fixed;
-  top: 0; 
-  background-color: #FF0000
+.ui.container {
+  padding-top: 5em;
+  padding-bottom: 5em;
 }
-div.profile-right {
-  width: 640px;
-  float: left;
-  background-color: #00FF00
-}
-div.avatar {
-  padding-top: 46px;
-  padding-left: 46px;
-  padding-right: 46px;
-}
-div.username {
-  font-size: 24px;
+.ui segment avatar{
   text-align: center;
-}
-div.general {
-  background-color: #444444;
-  color: #FFFFFF
-}
-div.section {
-  background-color: #CCCCCC;
-  color: #000000;
-}
-div.stats {
-  background-color: #EEEEEE;
-  color: #000000;
-}
-div.performance-chart {
-  padding: 10px;
-}
-div.activity {
-  padding: 10px;
-  font-size: 10px;
-}
-div.blank {
-  padding: 7px;
-}
-td.activity-time {
-  width: 120px;
-}
-td.activity-detail {
-  width: 500px;
-}
-img.avatar {
-  width: 128px;
-  height: 128px;
+  background-color: #ff0000;
 }
