@@ -19,7 +19,10 @@ class UsersScoresTransaction(object):
     def execute(self):
         try:
             log.info('ORSI0001', 'UsersScoresTransaction')
-            self.__set_users_scores_transaction()
+            user_ids = self.__get_target_user_ids()
+            for __user_id in user_ids:
+                user_id = __user_id['user_id']
+                self.__set_users_scores_transaction(user_id)
             connection.commit()
             connection.close()
             log.info('ORSI0002', 'UsersScoresTransaction')
@@ -27,6 +30,11 @@ class UsersScoresTransaction(object):
             log.critical('ORSC0001', 'UsersScoresTransaction', e)
             raise Exception(e)
 
-    def __set_users_scores_transaction(self):
-        result = database.execute_statement(connection, 't_users_scores_I01')
-        log.debug('ORSD0006', 't_users_scores', result[0])
+    def __get_target_user_ids(self):
+        result = database.execute_statement(connection, 'm_users_003')
+        user_ids = result[1]
+        return user_ids
+
+    def __set_users_scores_transaction(self, user_id):
+        result = database.execute_statement(connection, 't_users_scores_I01', user_id)
+        log.debug('ORSD0002', 't_users_scores', result[0], user_id)

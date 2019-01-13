@@ -1,5 +1,5 @@
 INSERT INTO
-  ors.m_users_scores(
+  m_users_scores(
     user_id,
     score_id,
     beatmap_md5,
