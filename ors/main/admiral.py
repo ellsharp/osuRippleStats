@@ -1,6 +1,7 @@
 from ors.main.users_stats_work import UsersStatsWork
 from ors.main.users_stats_transaction import UsersStatsTransaction
 from ors.main.users_stats_master import UsersStatsMaster
+from ors.main.users_stats_monthly import UsersStatsMonthly
 from ors.main.users_scores_work import UsersScoresWork
 from ors.main.users_scores_transaction import UsersScoresTransaction
 from ors.main.users_scores_master import UsersScoresMaster
@@ -23,12 +24,13 @@ class Admiral(object):
         self.__execute_shell(UsersStatsWork(), 'UsersStatsWork')
         self.__execute_shell(UsersStatsTransaction(), 'UsersStatsTransaction')
         self.__execute_shell(UsersStatsMaster(), 'UsersStatsMaster')
+        self.__execute_shell(UsersStatsMonthly(), 'UsersStatsMonthly')
         self.__execute_shell(UsersScoresWork(), 'UsersScoresWork')
         self.__execute_shell(BeatmapMaster(), 'BeatmapMaster')
         self.__execute_shell(UsersScoresTransaction(), 'UsersScoresTransaction')
         self.__execute_shell(UsersScoresMaster(), 'UsersScoresMaster')
         self.__execute_shell(UsersActivity(), 'UsersActivity')
-        self.__execute_shell(FirstPlaceMaster(), 'FirstPlaceMaster')
+        #self.__execute_shell(FirstPlaceMaster(), 'FirstPlaceMaster')
 
     def __execute_shell(self, constructor, process_name):
         log.info('ORSI0001', process_name)

@@ -36,7 +36,7 @@ class Database(object):
     def execute_statement(self, connection, sql_name, *parameters):
         sql_path = 'sql/' + sql_name + '.sql'
         sql_file = open(sql_path, 'r')
-        sql = sql_file.read()
+        sql = sql_file.read().format()
         statement = sql % parameters
         try:
             cursor = connection.cursor()
@@ -53,7 +53,7 @@ class Database(object):
     def execute_statement_values(self, connection, sql_name, values):
         sql_path = 'sql/' + sql_name + '.sql'
         sql_file = open(sql_path, 'r')
-        sql = sql_file.read()
+        sql = sql_file.read().format()
         statement = sql % tuple(values)
         try:
             cursor = connection.cursor()

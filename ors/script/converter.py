@@ -137,6 +137,54 @@ def convert_first_place_score(first_place_score):
     first_place_score['time'] = convert_datetime(convert_iso_datetime(first_place_score['time']))
     return first_place_score
 
+def convert_monthly_stats(month, latest, oldest):
+    monthly_stats = {}
+    monthly_stats['user_id'] = latest['user_id']
+    monthly_stats['username'] = latest['username']
+    monthly_stats['month'] = month
+    monthly_stats['ranked_score_std'] = latest['ranked_score_std'] - oldest['ranked_score_std']
+    monthly_stats['total_score_std'] = latest['total_score_std'] - oldest['total_score_std']
+    monthly_stats['playcount_std'] = latest['playcount_std'] - oldest['playcount_std']
+    monthly_stats['replays_watched_std'] = latest['replays_watched_std'] - oldest['replays_watched_std']
+    monthly_stats['total_hits_std'] = latest['total_hits_std'] - oldest['total_hits_std']
+    monthly_stats['level_std'] = latest['level_std'] - oldest['level_std']
+    monthly_stats['accuracy_std'] = latest['accuracy_std'] - oldest['accuracy_std']
+    monthly_stats['pp_std'] = latest['pp_std'] - oldest['pp_std']
+    monthly_stats['global_leaderboard_rank_std'] = latest['global_leaderboard_rank_std'] - oldest['global_leaderboard_rank_std']
+    monthly_stats['country_leaderboard_rank_std'] = latest['country_leaderboard_rank_std'] - oldest['country_leaderboard_rank_std']
+    monthly_stats['ranked_score_taiko'] = latest['ranked_score_taiko'] - oldest['ranked_score_taiko']
+    monthly_stats['total_score_taiko'] = latest['total_score_taiko'] - oldest['total_score_taiko']
+    monthly_stats['playcount_taiko'] = latest['playcount_taiko'] - oldest['playcount_taiko']
+    monthly_stats['replays_watched_taiko'] = latest['replays_watched_taiko'] - oldest['replays_watched_taiko']
+    monthly_stats['total_hits_taiko'] = latest['total_hits_taiko'] - oldest['total_hits_taiko']
+    monthly_stats['level_taiko'] = latest['level_taiko'] - oldest['level_taiko']
+    monthly_stats['accuracy_taiko'] = latest['accuracy_taiko'] - oldest['accuracy_taiko']
+    monthly_stats['pp_taiko'] = latest['pp_taiko'] - oldest['pp_taiko']
+    monthly_stats['global_leaderboard_rank_taiko'] = latest['global_leaderboard_rank_taiko'] - oldest['global_leaderboard_rank_taiko']
+    monthly_stats['country_leaderboard_rank_taiko'] = latest['country_leaderboard_rank_taiko'] - oldest['country_leaderboard_rank_taiko']
+    monthly_stats['ranked_score_ctb'] = latest['ranked_score_ctb'] - oldest['ranked_score_ctb']
+    monthly_stats['total_score_ctb'] = latest['total_score_ctb'] - oldest['total_score_ctb']
+    monthly_stats['playcount_ctb'] = latest['playcount_ctb'] - oldest['playcount_ctb']
+    monthly_stats['replays_watched_ctb'] = latest['replays_watched_ctb'] - oldest['replays_watched_ctb']
+    monthly_stats['total_hits_ctb'] = latest['total_hits_ctb'] - oldest['total_hits_ctb']
+    monthly_stats['level_ctb'] = latest['level_ctb'] - oldest['level_ctb']
+    monthly_stats['accuracy_ctb'] = latest['accuracy_ctb'] - oldest['accuracy_ctb']
+    monthly_stats['pp_ctb'] = latest['pp_ctb'] - oldest['pp_ctb']
+    monthly_stats['global_leaderboard_rank_ctb'] = latest['global_leaderboard_rank_ctb'] - oldest['global_leaderboard_rank_ctb']
+    monthly_stats['country_leaderboard_rank_ctb'] = latest['country_leaderboard_rank_ctb'] - oldest['country_leaderboard_rank_ctb']
+    monthly_stats['ranked_score_mania'] = latest['ranked_score_mania'] - oldest['ranked_score_mania']
+    monthly_stats['total_score_mania'] = latest['total_score_mania'] - oldest['total_score_mania']
+    monthly_stats['playcount_mania'] = latest['playcount_mania'] - oldest['playcount_mania']
+    monthly_stats['replays_watched_mania'] = latest['replays_watched_mania'] - oldest['replays_watched_mania']
+    monthly_stats['total_hits_mania'] = latest['total_hits_mania'] - oldest['total_hits_mania']
+    monthly_stats['level_mania'] = latest['level_mania'] - oldest['level_mania']
+    monthly_stats['accuracy_mania'] = latest['accuracy_mania'] - oldest['accuracy_mania']
+    monthly_stats['pp_mania'] = latest['pp_mania'] - oldest['pp_mania']
+    monthly_stats['global_leaderboard_rank_mania'] = latest['global_leaderboard_rank_mania'] - oldest['global_leaderboard_rank_mania']
+    monthly_stats['country_leaderboard_rank_mania'] = latest['country_leaderboard_rank_mania'] - oldest['country_leaderboard_rank_mania']
+    monthly_stats['created_on'] = convert_datetime(datetime.now(pytz.timezone('UTC')))
+    return monthly_stats
+
 def convert_iso_datetime(iso_str):
     dt = None
     if ":" == iso_str[-3:-2]:
