@@ -131,7 +131,11 @@
         <div class="ui secondary attached segment">
           <p>Recent Activity</p>
         </div>
-        <?php print_users_activity($user_id, $username); ?>
+        <div class="ui attached segment">
+          <div class="ui two column grid">
+            <?php print_users_activity($user_id, $username); ?>
+          </div>
+        </div>
         <div class="ui secondary attached segment">
           <p>Detail Stats</p>
         </div>
@@ -216,11 +220,13 @@
           <p>Most Passed Beatmaps</p>
         </div>
         <div class="ui attached segment">
+          <?php print_users_most_passed_beatmaps($user_id, $mode_num); ?>
         </div>
         <div class="ui secondary attached segment">
-          <p>Recent Plays (last 24h)</p>
+          <p>Recent Plays</p>
         </div>
         <div class="ui attached segment">
+          <?php print_users_recent_plays($user_id, $mode_num); ?>
         </div>
         <div class="ui secondary attached segment">
           <p>Replays Watched History</p>

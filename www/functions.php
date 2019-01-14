@@ -84,9 +84,9 @@
     $rank_count = array('ss' => $count_ss, 's' => $count_s, 'a' => $count_a);
     return $rank_count;
   }
-  function get_users_activity($user_id, $limit) {
+  function get_users_activity($user_id) {
     $pdo = get_pdo();
-    $query = 'SELECT * FROM t_users_activity WHERE user_id = :user_id ORDER BY archived_on DESC';
+    $query = 'SELECT * FROM t_users_activity WHERE user_id = :user_id ORDER BY archived_on DESC LIMIT 30';
     $statement = $pdo -> prepare($query);
     $statement -> execute([':user_id' => $user_id]);
     $counter = 0;
@@ -102,7 +102,6 @@
       $users_activity_temp += array('mode' => $row['mode']);
       $users_activity += array($counter => $users_activity_temp);
       $counter += 1;
-      if ($counter > $limit) { break; }
     }
     return $users_activity;
   }
@@ -149,9 +148,8 @@
     }
   }
   function print_users_activity($user_id, $username) {
-    $users_activity = get_users_activity($user_id, 30);
+    $users_activity = get_users_activity($user_id);
     $counter = 0;
-    print('<div class="ui two column grid attached segment">');
     foreach ($users_activity as $activity) {
       $type = $activity['type'];
       $ranking = $activity['ranking'];
@@ -161,10 +159,10 @@
       $song_name = $activity['song_name'];
       $mode_name = get_mode_name_full($activity['mode']);
       if ($type != 2 and $ranking < 51) {
-        print('<div class="three wide column attached segment">');
+        print('<div class="ui three wide column left aligned" style="padding-top: 0.5rem; padding-bottom: 0.5rem">');
         print('<p>'.get_datetime_diff($archived_on).'</p>');
         print('</div>');
-        print('<div class="thirteen wide column attached segment">');
+        print('<div class="ui thirteen wide column left aligned" style="padding-top : 0.5rem; padding-bottom: 0.5rem">');
         print('<p>');
         print('<img src="/images/'.$rank.'_small.png" style="padding-right: 8px"/>');
         print($username.' archived rank ');
@@ -175,19 +173,20 @@
         }
         print('</p>');
         print('</div>');
+        $counter += 1;
       } else if ($type == 2) {
-        print('<div class="three wide column attached segment">');
+        print('<div class="three wide column attached segment" style="padding-top: 0.5rem; padding-bottom: 0.5rem">');
         print('<p>'.get_datetime_diff($archived_on).'</p>');
         print('</div>');
-        print('<div class="thirteen wide column attached segment">');
+        print('<div class="thirteen wide column attached segment" style="padding-top: 0.5rem; padding-bottom: 0.5rem">');
         print('<p>');
         print($username.' has lost first place on on <a href="https://ripple.moe/b/'.$beatmap_id.'">'.$song_name.'</a> ('.$mode_name.')');
         print('</p>');
         print('</div>');
+        $counter += 1;
       }
-      $counter += 1;
+      if ($counter > 15) { break; }
     }
-    print('</div>');
   }
   function print_first_place_ranks($user_id, $mode_num) {
     $pdo = get_pdo();
@@ -208,7 +207,11 @@
       print('<div class="thirteen wide column left aligned">');
       print('<p>');
       print('<img src="/images/'.$rank.'_small.png" style="padding-right: 8px">');
-      print('<a href="https://ripple.moe/b/'.$beatmap_id.'">'.$song_name.' ('.sprintf('%0.2f', $accuracy).'%)</a>');
+      if ($mods == 0) {
+        print('<a href="https://ripple.moe/b/'.$beatmap_id.'">'.$song_name.'</a> ('.sprintf('%0.2f', $accuracy).'%)');
+      } else {
+        print('<a href="https://ripple.moe/b/'.$beatmap_id.'">'.$song_name.'</a> <b>+'.get_mods($mods).'</b> ('.sprintf('%0.2f', $accuracy).'%)');
+      }
       print('</p>');
       print('<p>'.get_datetime_diff($time).'</p>');
       print('</div>');
@@ -220,6 +223,46 @@
     }
     print('</div>');
   }
+  function print_users_recent_plays($user_id, $mode_num) {
+    $pdo = get_pdo();
+    $query = 'SELECT t_users_scores.mods AS mods, t_users_scores.rank AS rank, t_users_scores.time AS time, t_users_scores.score AS score, m_beatmaps.song_name, m_beatmaps.beatmap_id as beatmap_id FROM t_users_scores INNER JOIN  m_beatmaps ON t_users_scores.beatmap_md5 = m_beatmaps.beatmap_md5 WHERE t_users_scores.user_id = :user_id AND t_users_scores.play_mode = :mode_num ORDER BY time DESC LIMIT 5;';
+    $statement = $pdo -> prepare($query);
+    $statement -> execute([':user_id' => $user_id, 'mode_num' => $mode_num]);
+    while ($row = $statement -> fetch(PDO::FETCH_ASSOC)) {
+      $song_name = $row['song_name'];
+      $beatmap_id = $row['beatmap_id'];
+      $score = $row['score'];
+      $mods = $row['mods'];
+      $time = $row['time'];
+      $rank = $row['rank'];
+      print('<div class="ui left aligned">');
+      print('<p>');
+      print(get_datetime_diff($time).' - ');
+      print('<a href="https://ripple.moe/b/'.$beatmap_id.'"> '.$song_name.'</a> ');
+      print(number_format($score).' ('.$rank.') '.get_mods($mods));
+      print('</p>');
+      print('</div>');
+    }
+  }
+  function print_users_most_passed_beatmaps($user_id, $mode_num) {
+    $pdo = get_pdo();
+    $query = 'SELECT COUNT(*) AS count, m_beatmaps.song_name, m_beatmaps.beatmap_id FROM t_users_scores INNER JOIN m_beatmaps ON t_users_scores.beatmap_md5 = m_beatmaps.beatmap_md5 WHERE t_users_scores.user_id = :user_id and t_users_scores.play_mode = :mode_num GROUP BY m_beatmaps.beatmap_md5 ORDER BY count DESC LIMIT 15';
+    $statement = $pdo -> prepare($query);
+    $statement -> execute([':user_id' => $user_id, 'mode_num' => $mode_num]);
+    $font_size = 180;
+    while ($row = $statement -> fetch(PDO::FETCH_ASSOC)) {
+      $count = $row['count'];
+      $song_name = $row['song_name'];
+      $beatmap_id = $row['beatmap_id'];
+      print('<div class="ui left aligned">');
+      print('<p style="font-size: '.$font_size.'%";>');
+      print($count.' Plays - ');
+      print('<a href="https://ripple.moe/b/'.$beatmap_id.'"> '.$song_name.'</a> ');
+      print('</p>');
+      print('</div>');
+      $font_size = $font_size - 6;
+    }
+  }
   function print_pp_chart_label($date) {
     for ($i = count($date); 0 < $i; $i--) {
       print('"'.$i.'", ');
@@ -229,5 +272,51 @@
     for ($i = 0; $i < count($pp_rank); $i++) {
       print($pp_rank[$i].',');
     }
+  }
+  function get_mods($mods_num) {
+    $mods = array();
+    $bin  = decbin($mods_num);
+    $bits = str_split($bin);
+    $bits = array_reverse($bits);
+    $bits = array_filter($bits);
+    foreach ( $bits as $pos => $bit ) {
+        $bits[$pos] = pow(2, $pos);
+    }
+    $bits = array_values($bits);
+    foreach ($bits as $bit) {
+      if ($bit == 16384) {
+        if (($key = array_search('SD', $mods)) !== false) {
+          unset($mods[$key]);
+          array_push($mods, 'PF');
+        }
+      } else if ($bit == 512) {
+        if (($key = array_search('DT', $mods)) !== false) {
+          unset($mods[$key]);
+          array_push($mods, 'NC');
+        }
+      } else {
+        array_push($mods, get_mod_str($bit));
+      }
+    }
+    $mods_str = '';
+    foreach ($mods as $mod) {
+      $mods_str = $mods_str.$mod;
+      if (next($mods) == True) {
+          $mods_str = $mods_str.',';
+      }
+    }
+    return $mods_str;
+  }
+  function get_mod_str($mod_num) {
+    if ($mod_num == 1) {return 'NF'; }
+    else if ($mod_num == 2) {return 'EZ';}
+    else if ($mod_num == 8) {return 'HD';}
+    else if ($mod_num == 16) {return 'HR';}
+    else if ($mod_num == 32) {return 'SD';}
+    else if ($mod_num == 64) {return 'DT';}
+    else if ($mod_num == 256) {return 'HT';}
+    else if ($mod_num == 576) {return 'NC';}
+    else if ($mod_num == 1024) {return 'FL';}
+    else if ($mod_num == 4096) {return 'SO';}
   }
 ?>
