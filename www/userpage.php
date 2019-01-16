@@ -5,6 +5,8 @@
   $users_stats = get_users_stats($user_id, $mode_num);
   $username = $users_stats['username'];
   $global_leaderboard_rank = get_users_pp_rank_history($user_id, $mode_num);
+  $playcount_chart = get_users_playcount_history($user_id, $mode_num);
+  $replays_chart = get_users_replays_history($user_id, $mode_num);
   $ranked_score = $users_stats['ranked_score'];
   $accuracy = $users_stats['accuracy'];
   $playcount = $users_stats['playcount'];
@@ -35,9 +37,52 @@
   <script src="semantic/dist/semantic.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
   <script>
-    window.onLoad=$('#current-level').progress({
-  percent: 22
-});
+    $(function(){
+      var key = '.ui.horizontal.two.column.grid.attached.segment.fp';
+      var division = 10;
+      var divlength = $('#first-place-rank-score '+key).length;
+      dlsizePerResult = divlength / division;
+      for(i = 1; i <= dlsizePerResult; i++) {
+        $('#first-place-rank-score ' + key).eq(division * i - 1)
+        .after('<div class="ui secondary attached segment right aligned more div'+i+'"><button class="ui button active">Show me more!</button>');
+      }
+      $('#first-place-rank-score ' + key + ', .ui.secondary.attached.segment.right.aligned.more').hide();
+      for(j = 0; j < division; j++) {
+        $('#first-place-rank-score ' + key).eq(j).show();
+      }
+      $('.ui.secondary.attached.segment.right.aligned.more.div1').show();
+      $('.ui.secondary.attached.segment.right.aligned.more').click(function(){
+        index = $(this).index('.ui.secondary.attached.segment.right.aligned.more');
+        for(k = 0; k < (index + 2) * division; k++){
+          $('#first-place-rank-score ' + key).eq(k).fadeIn();
+        }
+        $('.ui.secondary.attached.segment.right.aligned.more').hide();
+        $('.ui.secondary.attached.segment.right.aligned.more').eq(index+1).show();
+      });
+    });
+    $(function(){
+      var key = '.ui.horizontal.two.column.grid.attached.segment.bp';
+      var division = 10;
+      var divlength = $('#best-performance-scores ' + key).length;
+      dlsizePerResult = divlength / division;
+      for(i = 1; i <= dlsizePerResult; i++) {
+        $('#best-performance-scores ' + key).eq(division * i - 1)
+        .after('<div class="ui secondary attached segment right aligned more div'+i+'"><button class="ui button active">Show me more!</button>');
+      }
+      $('#best-performance-scores ' + key + ', .ui.secondary.attached.segment.right.aligned.more').hide();
+      for(j = 0; j < division; j++) {
+        $('#best-performance-scores ' + key).eq(j).show();
+      }
+      $('.ui.secondary.attached.segment.right.aligned.more.div1').show();
+      $('.ui.secondary.attached.segment.right.aligned.more').click(function(){
+        index = $(this).index('.ui.secondary.attached.segment.right.aligned.more');
+        for(k = 0; k < (index + 2) * division; k++){
+          $('#best-performance-scores ' + key).eq(k).fadeIn();
+        }
+        $('.ui.secondary.attached.segment.right.aligned.more').hide();
+        $('.ui.secondary.attached.segment.right.aligned.more').eq(index+1).show();
+      });
+    });
   </script>
 </head>
 <body>
@@ -97,19 +142,22 @@
                  {
                     label: "Performance Ranking",
                     borderColor: 'rgb(255, 128, 0)',
-                    lineTension: 0, //<===追加
-                    fill: false,    //<===追加
+                    lineTension: 0,
+                    fill: false,
                     data: [<?php print_pp_chart_data($global_leaderboard_rank[1]); ?>],
                  },
                  ]
               },
               options: {
                  responsive: true,
+                 legend: {
+                   display: false
+                 },
                  scales: {
                    xAxes: [{
                      display: true,
                      ticks: {
-                        callback: function(value) {return ((value % 30) == 0)? value + 'days ago' : ''},
+                        callback: function(value) {return ((value % 30) == 0)? value + ' days ago' : ''},
                      }
                    }],
                    yAxes: [{
@@ -171,20 +219,31 @@
         <div class="ui attached segment">
           <p>Ranks</p>
         </div>
+        <div class="ui horizontal eight column grid attached segment">
+          <div class="four wide column center middle aligned"></div>
+          <div class="one wide column center middle aligned"><img src="/images/SS.png" height="42" /></div>
+          <div class="one wide column center middle aligned"><?php print($count_ss); ?></div>
+          <div class="one wide column center middle aligned"></div>
+          <div class="one wide column center middle aligned"><img src="/images/S.png" height="42" /></div>
+          <div class="one wide column center middle aligned"><?php print($count_s); ?></div>
+          <div class="one wide column center middle aligned"></div>
+          <div class="one wide column center middle aligned"><img src="/images/A.png" height="42" /></div>
+          <div class="one wide column center middle aligned"><?php print($count_a); ?></div>
+          <div class="four wide column center middle aligned"></div>
+        </div>
         <div class="ui secondary inverted attached segment">
           <p>Top Ranks</p>
         </div>
         <div class="ui attached segment">
           <p>Best Performance</p>
-          <div class="ui top attached segment">
-            a
+          <div class="ui attached segment" id="best-performance-scores">
+            <?php print_best_performance_scores($user_id, $mode_num); ?>
           </div>
-          <div class="ui attached segment">
-          </div>
-          <div class="ui bottom attached segment">
-          </div>
+          <p></p>
           <p>First Place Ranks</p>
-          <?php print_first_place_ranks($user_id, $mode_num); ?>
+          <div class="ui attached segments" id="first-place-rank-score">
+            <?php print_first_place_ranks($user_id, $mode_num); ?>
+          </div>
         </div>
         <div class="ui secondary inverted attached segment">
           <p>Historical</p>
@@ -193,25 +252,39 @@
           <p>Play History</p>
         </div>
         <div class="ui attached segment">
-          <canvas id="ChartDemo2" height="80px"></canvas>
+          <canvas id="PlaycountChart" height="80px"></canvas>
           <script>
-            var ctx = document.getElementById("ChartDemo2").getContext('2d');
-            var ChartDemo = new Chart(ctx, {
+            var ctx = document.getElementById("PlaycountChart").getContext('2d');
+            var PlaycountChart = new Chart(ctx, {
                type: 'line',
                data: {
-                  labels: ["Item1", "Item2", "Item3", "Item4", "Item5", "Item6", "Item7"],
+                  labels: [<?php print_playcount_chart_label($playcount_chart[0]); ?>],
                   datasets: [
                   {
-                     label: "Chart-1",
-                     borderColor: 'rgb(255, 0, 0)',
+                     borderColor: 'rgb(128, 128, 255)',
                      lineTension: 0,
-                     fill: false,
-                     data: [20, 26, 12, 43, 33, 21, 29],
+                     fill: true,
+                     data: [<?php print_playcount_chart_data($playcount_chart[1]); ?>],
                   },
                   ]
                },
                options: {
-                  responsive: true,
+                 responsive: true,
+                 legend: {
+                   display: false
+                 },
+                 scales: {
+                   yAxes: [{
+                     ticks: {
+                       beginAtZero: true,
+                       userCallback: function(label, index, labels) {
+                         if (Math.floor(label) === label) {
+                           return label;
+                         }
+                       }
+                     }
+                   }]
+                 }
                }
             });
           </script>
@@ -232,25 +305,40 @@
           <p>Replays Watched History</p>
         </div>
         <div class="ui attached segment">
-          <canvas id="ChartDemo3" height="80px"></canvas>
+          <canvas id="ReplaysChart" height="80px"></canvas>
           <script>
-            var ctx = document.getElementById("ChartDemo3").getContext('2d');
-            var ChartDemo = new Chart(ctx, {
+            var ctx = document.getElementById("ReplaysChart").getContext('2d');
+            var ReplaysChart = new Chart(ctx, {
                type: 'line',
                data: {
-                  labels: ["Item1", "Item2", "Item3", "Item4", "Item5", "Item6", "Item7"],
+                  labels: [<?php print_replays_chart_label($replays_chart[0]); ?>],
                   datasets: [
                   {
                      label: "Chart-1",
-                     borderColor: 'rgb(255, 0, 0)',
+                     borderColor: 'rgb(255, 128, 0)',
                      lineTension: 0,
-                     fill: false,
-                     data: [20, 26, 12, 43, 33, 21, 29],
+                     fill: true,
+                     data: [<?php print_replays_chart_label($replays_chart[1]); ?>],
                   },
                   ]
                },
                options: {
-                  responsive: true,
+                 responsive: true,
+                 legend: {
+                   display: false
+                 },
+                 scales: {
+                   yAxes: [{
+                     ticks: {
+                       beginAtZero: true,
+                       userCallback: function(label, index, labels) {
+                         if (Math.floor(label) === label) {
+                           return label;
+                         }
+                       }
+                     }
+                   }]
+                 }
                }
             });
           </script>

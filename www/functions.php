@@ -59,10 +59,56 @@
     $query = 'SELECT MAX(max_combo) AS max_combo FROM m_users_scores WHERE user_id = :user_id AND play_mode = :mode_num';
     $statement = $pdo -> prepare($query);
     $statement -> execute([':user_id' => $user_id, 'mode_num' => $mode_num]);
+    $users_best_scores = array();
     while ($row = $statement -> fetch(PDO::FETCH_ASSOC)) {
       $max_combo = $row['max_combo'];
     }
     return $max_combo;
+  }
+  function print_best_performance_scores($user_id, $mode_num) {
+    $pdo = get_pdo();
+    $query = 'SELECT m_users_scores.score_id AS score_id, m_users_scores.mods AS mods, m_users_scores.rank AS rank, m_users_scores.time AS time, m_users_scores.accuracy AS accuracy, m_users_scores.pp AS pp, m_beatmaps.song_name, m_beatmaps.beatmap_id as beatmap_id FROM m_users_scores INNER JOIN  m_beatmaps ON m_users_scores.beatmap_md5 = m_beatmaps.beatmap_md5 WHERE m_users_scores.user_id = :user_id AND m_users_scores.play_mode = :mode_num ORDER BY pp DESC LIMIT 100;';
+    $statement = $pdo -> prepare($query);
+    $statement -> execute([':user_id' => $user_id, 'mode_num' => $mode_num]);
+    $weight_percent = [100, 95, 90, 86, 81, 77, 74, 70, 66, 63,
+                        60, 57, 54, 51, 49, 46, 44, 42, 38, 36,
+                        34, 32, 31, 29, 28, 26, 25, 24, 23, 21,
+                        20, 19, 28, 17, 17, 16, 15, 14, 14, 13,
+                        12, 12, 11, 10, 10,  9,  9,  9,  8,  8,
+                         7,  7,  7,  6,  6,  6,  5,  5,  5,  5,
+                         4,  4,  4,  4,  4,  3,  3,  3,  3,  3,
+                         3,  2,  2,  2,  2,  2,  2,  2,  2,  2,
+                         2,  1,  1,  1,  1,  1,  1,  1,  1,  1,
+                         1,  1,  1,  1,  1,  1,  1,  1,  1,  1];
+    $counter = 0;
+    while ($row = $statement -> fetch(PDO::FETCH_ASSOC)) {
+      $score_id = $row['score_id'];
+      $mods = $row['mods'];
+      $rank = $row['rank'];
+      $time = $row['time'];
+      $accuracy = $row['accuracy'];
+      $song_name = $row['song_name'];
+      $beatmap_id = $row['beatmap_id'];
+      $pp = $row['pp'];
+      print('<div class="ui horizontal two column grid attached segment bp" style="margin: 0">');
+      print('<div class="eleven wide column left aligned">');
+      print('<p style="margin-bottom: 0.5rem">');
+      print('<img src="/images/'.$rank.'_small.png" style="padding-right: 8px">');
+      if ($mods == 0) {
+        print('<a href="https://ripple.moe/b/'.$beatmap_id.'">'.$song_name.'</a> ('.sprintf('%0.2f', $accuracy).'%)');
+      } else {
+        print('<a href="https://ripple.moe/b/'.$beatmap_id.'">'.$song_name.'</a> <b>+'.get_mods($mods).'</b> ('.sprintf('%0.2f', $accuracy).'%)');
+      }
+      print('</p>');
+      print('<p>'.get_datetime_diff($time).'</p>');
+      print('</div>');
+      print('<div class="five wide column right aligned">');
+      print('<p style="margin-bottom: 0.5rem">'.sprintf('%d', $pp).'pp</p>');
+      print('<p>weighted '.$weight_percent[$counter].'% ('.sprintf('%d', $pp * ($weight_percent[$counter] / 100)).'pp) <a href="https://ripple.moe/web/replays/'.$score_id.'"><i class="star link icon"></i></a></p>');
+      print('</div>');
+      print('</div>');
+      $counter = $counter + 1;
+    }
   }
   function get_users_ranks_count($user_id, $mode_num) {
     $pdo = get_pdo();
@@ -126,6 +172,42 @@
     $pp_rank_history[] = $pp_rank;
     return $pp_rank_history;
   }
+  function get_users_playcount_history($user_id, $mode_num) {
+    $pdo = get_pdo();
+    $mode_name = get_mode_name_short($mode_num);
+    $playcount = 'playcount_'.$mode_name;
+    $query = 'SELECT month, '.$playcount.' AS playcount FROM t_users_stats_monthly WHERE user_id = :user_id';
+    $statement = $pdo -> prepare($query);
+    $statement -> execute([':user_id' => $user_id]);
+    $month = [];
+    $playcount = [];
+    while ($row = $statement -> fetch(PDO::FETCH_ASSOC)) {
+      $month[] = $row['month'];
+      $playcount[] = $row['playcount'];
+    }
+    $playcount_history = [];
+    $playcount_history[] = $month;
+    $playcount_history[] = $playcount;
+    return $playcount_history;
+  }
+  function get_users_replays_history($user_id, $mode_num) {
+    $pdo = get_pdo();
+    $mode_name = get_mode_name_short($mode_num);
+    $replays = 'replays_watched_'.$mode_name;
+    $query = 'SELECT month, '.$replays.' AS replays FROM t_users_stats_monthly WHERE user_id = :user_id';
+    $statement = $pdo -> prepare($query);
+    $statement -> execute([':user_id' => $user_id]);
+    $month = [];
+    $replays = [];
+    while ($row = $statement -> fetch(PDO::FETCH_ASSOC)) {
+      $month[] = $row['month'];
+      $replays[] = $row['replays'];
+    }
+    $replays_history = [];
+    $replays_history[] = $month;
+    $replays_history[] = $replays;
+    return $replays_history;
+  }
   function get_datetime_diff($datetime) {
     $now = new Datetime();
     $datetime = new Datetime($datetime);
@@ -144,7 +226,7 @@
     } else if ($minute > 0) {
       return $minute.' minutes ago';
     } else {
-      return 'less than minute ago';
+      return 'less than minutes ago';
     }
   }
   function print_users_activity($user_id, $username) {
@@ -193,7 +275,6 @@
     $query = 'SELECT m_first_place.score_id AS score_id, m_first_place.mods AS mods, m_first_place.rank AS rank, m_first_place.time AS time, m_first_place.accuracy AS accuracy, m_first_place.pp AS pp, m_beatmaps.song_name, m_beatmaps.beatmap_id as beatmap_id FROM m_first_place INNER JOIN  m_beatmaps ON m_first_place.beatmap_md5 = m_beatmaps.beatmap_md5 WHERE m_first_place.user_id = :user_id AND m_first_place.play_mode = :mode_num ORDER BY time DESC;';
     $statement = $pdo -> prepare($query);
     $statement -> execute([':user_id' => $user_id, 'mode_num' => $mode_num]);
-    print('<div class="ui attached segments">');
     while ($row = $statement -> fetch(PDO::FETCH_ASSOC)) {
       $rank = $row['rank'];
       $song_name = $row['song_name'];
@@ -203,9 +284,9 @@
       $pp = $row['pp'];
       $score_id = $row['score_id'];
       $beatmap_id = $row['beatmap_id'];
-      print('<div class="ui horizontal two column grid attached segment" style="margin: 0">');
+      print('<div class="ui horizontal two column grid attached segment fp" style="margin: 0">');
       print('<div class="thirteen wide column left aligned">');
-      print('<p>');
+      print('<p style="margin-bottom: 0.5rem">');
       print('<img src="/images/'.$rank.'_small.png" style="padding-right: 8px">');
       if ($mods == 0) {
         print('<a href="https://ripple.moe/b/'.$beatmap_id.'">'.$song_name.'</a> ('.sprintf('%0.2f', $accuracy).'%)');
@@ -216,12 +297,11 @@
       print('<p>'.get_datetime_diff($time).'</p>');
       print('</div>');
       print('<div class="three wide column right aligned">');
-      print('<p>'.sprintf('%d', $pp).'pp</p>');
+      print('<p style="margin-bottom: 0.5rem">'.sprintf('%d', $pp).'pp</p>');
       print('<p><a href="https://ripple.moe/web/replays/'.$score_id.'"><i class="star link icon"></i></a></p>');
       print('</div>');
       print('</div>');
     }
-    print('</div>');
   }
   function print_users_recent_plays($user_id, $mode_num) {
     $pdo = get_pdo();
@@ -271,6 +351,26 @@
   function print_pp_chart_data($pp_rank) {
     for ($i = 0; $i < count($pp_rank); $i++) {
       print($pp_rank[$i].',');
+    }
+  }
+  function print_playcount_chart_label($date) {
+    for ($i = 0; $i < count($date); $i++) {
+      print('"'.$date[$i].'",');
+    }
+  }
+  function print_playcount_chart_data($playcount) {
+    for ($i = 0; $i < count($playcount); $i++) {
+      print($playcount[$i].',');
+    }
+  }
+  function print_replays_chart_label($date) {
+    for ($i = 0; $i < count($date); $i++) {
+      print('"'.$date[$i].'",');
+    }
+  }
+  function print_replays_chart_data($replays) {
+    for ($i = 0; $i < count($replays); $i++) {
+      print($replays[$i].',');
     }
   }
   function get_mods($mods_num) {
