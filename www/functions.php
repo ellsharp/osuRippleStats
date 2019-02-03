@@ -419,4 +419,17 @@
     else if ($mod_num == 1024) {return 'FL';}
     else if ($mod_num == 4096) {return 'SO';}
   }
+  function print_donor_badge($user_id) {
+    $pdo = get_pdo();
+    $query = 'SELECT COUNT(*) AS count FROM m_users_badges WHERE user_id = :user_id AND badge_id = 14';
+    $statement = $pdo -> prepare($query);
+    $statement -> execute([':user_id' => $user_id]);
+    $row = $statement -> fetch(PDO::FETCH_ASSOC);
+    $is_donor = $row['count'];
+    if ($is_donor == 1) {
+      print('<div class="ui label">');
+      print('<i class="money icon"></i> Ripple Donor');
+      print('</div>');
+    }
+  }
 ?>

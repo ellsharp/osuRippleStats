@@ -30,7 +30,7 @@ class Admiral(object):
         self.__execute_shell(UsersScoresTransaction(), 'UsersScoresTransaction')
         self.__execute_shell(UsersScoresMaster(), 'UsersScoresMaster')
         self.__execute_shell(UsersActivity(), 'UsersActivity')
-        #self.__execute_shell(FirstPlaceMaster(), 'FirstPlaceMaster')
+        self.__execute_shell(FirstPlaceMaster(), 'FirstPlaceMaster')
 
     def __execute_shell(self, constructor, process_name):
         log.info('ORSI0001', process_name)

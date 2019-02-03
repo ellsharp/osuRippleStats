@@ -96,9 +96,7 @@
         <div class="ui attached segment center aligned">
           <h1><?php print($username); ?></h1>
           <i class="<?php print($country); ?> flag"></i>
-          <div class="ui label">
-            <i class="money icon"></i> Ripple Donor
-          </div>
+          <?php print_donor_badge($user_id); ?>
         </div>
         <div class="ui attached segment">
           <p><i class="circle check icon"></i> <?php print($registered_on_relative); ?></p>

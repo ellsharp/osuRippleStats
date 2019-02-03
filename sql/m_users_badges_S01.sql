@@ -1,7 +1,7 @@
 SELECT
-  COUNT(*) AS count
+  COUNT(*) count
 FROM
-  m_users
+  m_users_badges
 WHERE
   user_id = %s
 ;

@@ -1,5 +1,5 @@
 INSERT INTO
-  ors.w_users_badges(
+  w_users_badges(
     user_id,
     badge_id,
     name,

@@ -1,11 +1,13 @@
 INSERT INTO
-  w_users_silence_info(
+  m_users_badges(
     user_id,
-    reason,
-    end,
+    badge_id,
+    name,
+    icon,
     created_on
   )
 VALUES (
+  %s,
   %s,
   '%s',
   '%s',

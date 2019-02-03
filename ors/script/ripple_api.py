@@ -6,8 +6,7 @@ import sys
 from ors.script import logger
 
 if __name__ == "__main__":
-    ripple_api = ripple_api.RippleApi()
-    print(ripple_api.get_users_scores_recent(70666, 0))
+    util.count_up_api_request()
 
 class RippleApi(object):
     global log
@@ -30,7 +29,7 @@ class RippleApi(object):
         except Exception as e:
             sys.exit(1)
         # Wait a second to don't get a high load on Ripple API.
-        time.sleep(1)
+        ripple_api.count_up_api_request()
         return response
 
     def get_users_full(self, user_id):
@@ -78,7 +77,8 @@ class RippleApi(object):
             else:
                 log.critical('ORSC0002', api_url, api_parameters)
                 sys.exit(1)
-        time.sleep(0.5)
+        util.count_up_api_request()
+        #time.sleep(0.5)
         return response
 
     def get_api_response_peppy(self, api_url, api_parameters):
@@ -98,5 +98,6 @@ class RippleApi(object):
             else:
                 log.critical('ORSC0002', api_url, api_parameters)
                 sys.exit(1)
-        time.sleep(1)
+        util.count_up_api_request()
+        #time.sleep(0.5)
         return response

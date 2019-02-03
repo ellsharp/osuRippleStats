@@ -78,4 +78,4 @@ class UsersActivity(object):
                 # Mark the score has processed on transaction.
                 result = database.execute_statement(connection, 'l_scores_on_activity_I01', user_id, transact_score_score_id, 3, transact_score['created_on'])
             counter = counter + 1
-        log.info('ORSI0011',  counter, user_id)
+        log.info('ORSI0011', counter, user_id)

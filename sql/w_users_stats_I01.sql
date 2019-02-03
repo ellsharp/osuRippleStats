@@ -1,5 +1,5 @@
 INSERT INTO
-  ors.w_users_stats(
+  w_users_stats(
     user_id,
     username,
     username_aka,
