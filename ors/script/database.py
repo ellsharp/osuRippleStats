@@ -1,6 +1,7 @@
 import re
 import sys
 import pymysql
+from datetime import datetime
 from ors.script import util
 from ors.script import logger
 
@@ -40,7 +41,12 @@ class Database(object):
         statement = sql % parameters
         try:
             cursor = connection.cursor()
+            start_time = datetime.now()
             count = cursor.execute(statement)
+            end_time = datetime.now()
+            process_time = end_time - start_time
+            process_time = "{0:.6f}".format(process_time.total_seconds())
+            log.info('ORSI0014', sql_name, process_time)
             result = cursor.fetchall()
             cursor.close()
         except Exception as e:
@@ -57,7 +63,11 @@ class Database(object):
         statement = sql % tuple(values)
         try:
             cursor = connection.cursor()
+            start_time = datetime.now()
             count = cursor.execute(statement)
+            end_time = datetime.now()
+            process_time = end_time - start_time
+            process_time = "{0:.6f}".format(process_time.total_seconds())
             result = cursor.fetchall()
             cursor.close()
         except Exception as e:
