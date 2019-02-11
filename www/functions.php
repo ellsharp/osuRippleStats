@@ -419,6 +419,18 @@
     else if ($mod_num == 1024) {return 'FL';}
     else if ($mod_num == 4096) {return 'SO';}
   }
+  function get_playstyle_array($playstyle_num) {
+    $playstyle = array();
+    $bin  = decbin($playstyle_num);
+    $bits = str_split($bin);
+    $bits = array_reverse($bits);
+    $bits = array_filter($bits);
+    foreach ( $bits as $pos => $bit ) {
+        $bits[$pos] = pow(2, $pos);
+    }
+    $playstyle_num_array = array_values($bits);
+    return $playstyle_num_array;
+  }
   function print_donor_badge($user_id) {
     $pdo = get_pdo();
     $query = 'SELECT COUNT(*) AS count FROM m_users_badges WHERE user_id = :user_id AND badge_id = 14';

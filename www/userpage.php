@@ -20,6 +20,7 @@
   $registered_on_relative = get_datetime_diff($registered_on);
   $latest_activity = $users_stats['latest_activity'];
   $latest_activity_relative = get_datetime_diff($latest_activity);
+  $play_style = $users_stats['play_style'];
   $country = $users_stats['country'];
   $count_ss = $ranks_count['ss'];
   $count_s = $ranks_count['s'];
@@ -99,14 +100,24 @@
           <?php print_donor_badge($user_id); ?>
         </div>
         <div class="ui attached segment">
-          <p><i class="circle check icon"></i> <?php print($registered_on_relative); ?></p>
-          <p><i class="play icon"></i> <?php print($latest_activity_relative); ?></p>
+          <p><i class="sign-in icon"></i> <?php print($registered_on_relative); ?></p>
+          <p><i class="sign-out icon"></i> <?php print($latest_activity_relative); ?></p>
         </div>
         <div class="ui attached segment center aligned">
-          <i class="big mouse pointer icon"></i>
-          <i class="big tablet icon"></i>
-          <i class="big keyboard icon"></i>
-          <i class="big hand point up icon"></i>
+          <?php
+            $playstyle_array = get_playstyle_array($play_style);
+            foreach ($playstyle_array as $playstyle) {
+              if ($playstyle == 1) {
+                print('<i class="big mouse pointer icon"></i>');
+              } else if ($playstyle == 2) {
+                print('<i class="big tablet icon"></i>');
+              } else if ($playstyle == 4) {
+                print('<i class="big keyboard icon"></i>');
+              } else if ($playstyle == 8) {
+                print('<i class="big hand point up icon"></i>');
+              }
+            }
+          ?>
         </div>
       </div>
       <div class="twelve wide column segment">
